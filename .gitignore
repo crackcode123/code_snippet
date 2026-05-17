@@ -1,0 +1,15 @@
+# Object files
+*.o
+*.obj
+
+# Compiled binaries
+*.exe
+*.out
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+
+# Specific compiled binaries (no extension)
+stl_essen
