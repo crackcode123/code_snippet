@@ -4,7 +4,7 @@
 #include<iostream>
 #include <functional>
 
-// function to calculate med of stream 
+// function to calculate med of stream
 void CalculateMedians(double arr[], int n)
 {
 	std::priority_queue<double> min_heap;
@@ -65,7 +65,7 @@ void CalculateMedians(double arr[], int n)
 
 int main()
 {
-	// stream of integers 
+	// stream of integers
 	double arr[] = { 5, 15, 10, 20, 3 };
 	int n = sizeof(arr) / sizeof(arr[0]);
 	CalculateMedians(arr, n);

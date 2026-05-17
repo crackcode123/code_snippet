@@ -1,5 +1,5 @@
 #include<iostream>
-#include <vector> 
+#include <vector>
 #include<algorithm> // sort, find, nth_element
 #include<numeric> // accumulate, iota
 #include <cstdint>
@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     {
         data_resize[i] = i+MAX_DATA;
     }
-   
+
     for (auto x: data_resize)
     {
         std::cout << "x=" << x <<std::endl;

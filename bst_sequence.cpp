@@ -96,7 +96,6 @@ void array_subsequence(std::list<int>& first, std::list<int>& second, std::vecto
 	array_subsequence_util(first, second, results, prefix);
 }
 
-
 int main()
 {
 	std::list<int> first = { 1,2 };

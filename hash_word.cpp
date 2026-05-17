@@ -1,13 +1,12 @@
 
 #include<stdlib.h>
 #include<string>
+#include<cstring>
 #include<stdint.h>
 #include<stddef.h>
 
-
-
 //
-// count hash table 
+// count hash table
 //
 
 typedef struct _word_node
@@ -18,7 +17,7 @@ typedef struct _word_node
 } word_node;
 
 //
-// max 11 words 
+// max 11 words
 //
 #define max_bucket 11
 #define hash_multiplier 31
@@ -78,13 +77,17 @@ void word_count_main()
 
 	}
 
-	typedef char* word;
-	word array[] = { "CAT", "CAT", "Hello", "Dadu", "BAT" };
+	const char* array[] = { "CAT", "CAT", "Hello", "Dadu", "BAT" };
 
 	for (int k = 0; k < 5; ++k)
 	{
-		make_hash(array[k]);
+		make_hash((char*)array[k]);
 	}
 }
 
+int main()
+{
+	word_count_main();
+	return 0;
+}
 

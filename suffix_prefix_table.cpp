@@ -77,7 +77,7 @@ static void compute_longest_suffix_prefix_table(std::vector<int>& table, const s
 	}
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
 	vector<int> table;
 

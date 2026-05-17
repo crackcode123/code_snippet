@@ -1,7 +1,6 @@
 // SalesTax.cpp : Defines the entry point for the console application.
 //
 
-
 /**************************************/
 
 #include<unordered_map> // for hash table
@@ -11,14 +10,12 @@
 #define _TEST_
 
 #ifdef _TEST_
-#define CACHE_SIZE 3 
+#define CACHE_SIZE 3
 #else
 #define CACHE_SIZE 50000
 #endif
 
-
 class clru;
-class clfu;
 
 namespace utility
 {
@@ -45,7 +42,7 @@ namespace sales_tax
 		unsigned int h = utility::generate_number_from_string(address) % 10;  // just to simulate actual look up takes time
 		return sales_tax[h];
 	}
-		
+
 }
 
 struct page
@@ -84,7 +81,7 @@ public:
 	}
 	~clru()
 	{
-		
+
 		for (int i = 0; i < CACHE_SIZE; ++i)
 		{
 			dqueue_elem<page>* tmp = _head;
@@ -173,14 +170,14 @@ private:
 	}
 
 private:
-	
+
 	size_t _size;
 	//
 	// pre-allocated double link list for LRU caching
 	//
 	dqueue_elem<page>* _head;
 	dqueue_elem<page>* _tail;
-	
+
 	//
 	// Hash table - we can implement more efficient/pre-allocated hash table if needed
 	//
@@ -229,13 +226,12 @@ namespace test
 		}
 		// print cache - Robotics should be replaced with CompuVision in the cache;
 		my_obj.dump_cache();
-		
+
 		sales_tax::fast_rate_lookup(my_array[0], my_obj);
 		my_obj.dump_cache();
 	}
 
 }
-
 
 int main()
 {

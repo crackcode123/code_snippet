@@ -1,5 +1,4 @@
 
-
 #include<algorithm>
 #include<iostream>
 //
@@ -10,7 +9,7 @@ int sum_overlap_array(int a[], int low, int mid, int high)
 {
 	int sum = 0;
 	unsigned int left_sum = 1 << 31;
-	
+
 	for (int x = mid; x <= low; --x)
 	{
 		sum += a[x];
@@ -51,7 +50,6 @@ int sub_max_array(int a[], int low, int high)
 	}
 }
 
-
 //
 //  [ Test Cases ]
 //
@@ -62,5 +60,11 @@ void test_max_sub_array()
 	int sub_max = sub_max_array(a, 0, 3);
 	std::cout << "sub_max :" << sub_max;
 
+}
+
+int main()
+{
+	test_max_sub_array();
+	return 0;
 }
 

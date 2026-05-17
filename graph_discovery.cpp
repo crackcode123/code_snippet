@@ -1,9 +1,7 @@
 // graph_discovery.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
 #include<list>
-#include<hash_map>
 #include<unordered_map>
 #include<unordered_set>
 #include<stack>
@@ -15,7 +13,7 @@ class Graph
 	int m_vertices;			// No. of vertices
 	std::list<int> *adj;    // Pointer to an array containing adjacency lists
 //
-// control plane 
+// control plane
 //
 public:
 	Graph(int V);  // Constructor
@@ -86,7 +84,7 @@ void Graph::create_graph(Graph& g)
 }
 
 /*
-	Topological sorting 
+	Topological sorting
 */
 
 static void toplogy_sort_util(Graph& g, int index, std::unordered_set < int>& my_set, std::stack<int>& my_stack)
@@ -111,7 +109,7 @@ void Graph::toplogy_sort()
 
 	std::unordered_set <int> my_set;
 	std::stack<int> my_stack;
-	
+
 	//
 	// iterate through the graph
 	//
@@ -204,7 +202,7 @@ void Graph::boggle()
 
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
 	Graph g(5);
 	Graph::create_graph(g);

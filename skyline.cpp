@@ -2,6 +2,11 @@
 // skyline building
 //
 
+#include <vector>
+#include <algorithm>
+#include <queue>
+#include <iostream>
+
 struct building
 {
 	int x;
@@ -55,7 +60,6 @@ static void make_skyline_input(const std::vector<building>& array_building, std:
 
 void skyline(std::vector<building>& array_building)
 {
-	//std::sort(array_building.begin(), array_building.end(), building_operator());
 	std::vector<skyline_input> results;
 	make_skyline_input(array_building, results);
 	std::sort(results.begin(), results.end(), skyline_input_operator());

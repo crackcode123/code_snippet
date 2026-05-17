@@ -1,7 +1,6 @@
 // Topological_Sorting.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
 #include<vector>
 #include<list>
 #include<stack>
@@ -37,14 +36,13 @@ public:
 		}
 	}
 
-
 	typedef std::vector<std::list<int> > the_graph;
 
 private:
 	void topology_sort_utility(std::stack<int>& _stack,std::vector<bool>& visited, int v)
 	{
 		visited[v] = true;
-		
+
 		std::list<int>& _list = _the_graph[v];
 		std::list<int>::iterator it = _list.begin();
 		std::list<int>::iterator end = _list.end();

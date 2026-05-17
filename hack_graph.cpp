@@ -1,7 +1,6 @@
 // hack_graph.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
 #include<list>
 #include<vector>
 #include<unordered_set>
@@ -41,12 +40,10 @@ public:
 		delete[] adj_list;
 	}
 
-
 private:
 	size_t vertices;
 	std::list<Node*> *adj_list;
 };
-
 
 bool Graph::bfs_search(Node* src, Node* dest)
 {
@@ -78,7 +75,6 @@ bool Graph::bfs_search(Node* src, Node* dest)
 	}
 	return true;
 }
-
 
 static bool is_loop_utility(Graph& gp, Node& parent, std::vector<bool>& in_stack, std::vector<bool>& visited)
 {
@@ -126,7 +122,6 @@ bool Graph::is_bipartite()
 {
 	return true;
 }
-
 
 int main()
 {

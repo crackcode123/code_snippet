@@ -1,10 +1,6 @@
 // stream_heap_10.cpp : Defines the entry point for the console application.
 //
 
-
-
-
-
 // A C++ program to demonstrate common Binary Heap Operations
 #include<iostream>
 #include<climits>
@@ -40,7 +36,7 @@ public:
 	int left(int left_index);
 
 	// to get index of right child of node at index i
-	int right(int right_index); 
+	int right(int right_index);
 
 	// to extract the root which is the minimum element
 	int extractMin();
@@ -102,11 +98,7 @@ void MinHeap::insertKey(int value) // logn
 		parent_x = parent(parent_x);
 	}
 
-
 }
-
-
-
 
 // to get index of left child of node at index i
 int MinHeap::left(int i)
@@ -125,8 +117,6 @@ int MinHeap::right(int i)
 	//
 	return (left(i)+1);
 }
-
-
 
 #include<stdio.h>
 
