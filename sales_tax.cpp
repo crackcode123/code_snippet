@@ -1,7 +1,6 @@
 // SalesTax.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
 
 /**************************************/
 
@@ -18,10 +17,10 @@
 #endif
 
 
-class CLRU;
-class CLFU;
+class clru;
+class clfu;
 
-namespace Utility
+namespace utility
 {
 	static unsigned int generate_number_from_string(const std::string& address)
 	{
@@ -37,19 +36,19 @@ namespace Utility
 
 }
 
-namespace SalesTax
+namespace sales_tax
 {
 	static double sales_tax_lookup(const std::string& address)
 	{
 		double sales_tax[] = {
 			2.72, 1.91, 2.46, 2.03, 1.12, 2.96, 3.79, 1.46, 2.66, 3.72 };
-		unsigned int h = Utility::generate_number_from_string(address) % 10;  // just to simulate actual look up takes time
+		unsigned int h = utility::generate_number_from_string(address) % 10;  // just to simulate actual look up takes time
 		return sales_tax[h];
 	}
 		
 }
 
-struct Page
+struct page
 {
 	double sales_tax;
 	std::string addr;
@@ -57,19 +56,19 @@ struct Page
 
 template<class X>
 
-struct DQueueElem
+struct dqueue_elem
 {
 	X _this_page;
-	DQueueElem* next;
-	DQueueElem* prev;
+	dqueue_elem* next;
+	dqueue_elem* prev;
 };
 
-class CLRU // Least Recently Used
+class clru // Least Recently Used
 {
 public:
-	CLRU():_size(0)
+	clru():_size(0)
 	{
-		DQueueElem<Page>* first_elem = create_element();
+		dqueue_elem<page>* first_elem = create_element();
 		_head = _tail = first_elem;
 
 		//
@@ -77,18 +76,18 @@ public:
 		//
 		for (int i = 0; i < (CACHE_SIZE-1); ++i)
 		{
-			DQueueElem<Page>* elem = create_element();
+			dqueue_elem<page>* elem = create_element();
 			_tail->next = elem;
 			elem->prev = _tail;
 			_tail = elem;
 		}
 	}
-	~CLRU()
+	~clru()
 	{
 		
 		for (int i = 0; i < CACHE_SIZE; ++i)
 		{
-			DQueueElem<Page>* tmp = _head;
+			dqueue_elem<page>* tmp = _head;
 			_head = _head->next;
 			delete(tmp);
 		}
@@ -96,19 +95,19 @@ public:
 
 	double fast_rate_lookup(const std::string& address)
 	{
-		std::unordered_map<std::string, DQueueElem<Page>*>::iterator it = hash_table.find(address);
-		std::unordered_map<std::string, DQueueElem<Page>*>::iterator end = hash_table.end();
+		std::unordered_map<std::string, dqueue_elem<page>*>::iterator it = hash_table.find(address);
+		std::unordered_map<std::string, dqueue_elem<page>*>::iterator end = hash_table.end();
 		double sales_tax = 0.0;
 		if (it != end)
 		{
-			DQueueElem<Page>* recent_elem = it->second;
+			dqueue_elem<page>* recent_elem = it->second;
 			adjust_recent_elem_into_front(recent_elem);
 			sales_tax = recent_elem->_this_page.sales_tax;
 		}
 		else
 		{
-			sales_tax = SalesTax::sales_tax_lookup(address);
-			Page my_page;
+			sales_tax = sales_tax::sales_tax_lookup(address);
+			page my_page;
 			my_page.addr = address;
 			my_page.sales_tax = sales_tax;
 			enqueue(my_page);
@@ -120,7 +119,7 @@ public:
 	// utility function to dump cache - debug!!
 	void dump_cache()
 	{
-		DQueueElem<Page>* my_haed = _head;
+		dqueue_elem<page>* my_haed = _head;
 
 		for (; my_haed; my_haed = my_haed->next)
 		{
@@ -129,21 +128,21 @@ public:
 	}
 
 private:
-	DQueueElem<Page>* create_element()
+	dqueue_elem<page>* create_element()
 	{
-		DQueueElem<Page>* elem = new DQueueElem<Page>();
+		dqueue_elem<page>* elem = new dqueue_elem<page>();
 		elem->prev = 0;
 		elem->next = 0;
 		elem->_this_page.sales_tax = 0;
 		return elem;
 	}
 
-	void adjust_recent_elem_into_front(DQueueElem<Page>* recent_element)
+	void adjust_recent_elem_into_front(dqueue_elem<page>* recent_element)
 	{
 		// if the current element is head nothing to do
 		if (_head == recent_element) return;
 
-		struct DQueueElem<Page>* tmp = recent_element->prev;
+		struct dqueue_elem<page>* tmp = recent_element->prev;
 		tmp->next = recent_element->next;
 		recent_element->next = _head;
 		recent_element->prev = _head->prev;
@@ -155,11 +154,11 @@ private:
 			_tail = tmp;
 	}
 
-	void enqueue(const Page& my_page)
+	void enqueue(const page& my_page)
 	{
 		std::string& my_string = _tail->_this_page.addr;
-		std::unordered_map<std::string, DQueueElem<Page>*>::iterator it = hash_table.find(my_string);
-		std::unordered_map<std::string, DQueueElem<Page>*>::iterator end = hash_table.end();
+		std::unordered_map<std::string, dqueue_elem<page>*>::iterator it = hash_table.find(my_string);
+		std::unordered_map<std::string, dqueue_elem<page>*>::iterator end = hash_table.end();
 
 		if (it != end )
 		{
@@ -179,59 +178,59 @@ private:
 	//
 	// pre-allocated double link list for LRU caching
 	//
-	DQueueElem<Page>* _head;
-	DQueueElem<Page>* _tail;
+	dqueue_elem<page>* _head;
+	dqueue_elem<page>* _tail;
 	
 	//
 	// Hash table - we can implement more efficient/pre-allocated hash table if needed
 	//
-	std::unordered_map<std::string, DQueueElem<Page>*> hash_table;
+	std::unordered_map<std::string, dqueue_elem<page>*> hash_table;
 };
 
-namespace SalesTax
+namespace sales_tax
 {
-	static double fast_rate_lookup(const std::string& address,CLRU& my_obj)
+	static double fast_rate_lookup(const std::string& address,clru& my_obj)
 	{
 		return my_obj.fast_rate_lookup(address);
 	}
 }
-namespace Test
+namespace test
 {
-	void Test_LRU_3()
+	void test_lru_3()
 	{
-		CLRU my_obj;
+		clru my_obj;
 		std::string my_array[3] = { "Robotics","Genetics","Nano" }; // , "CompuVision"
 
 		for (int i = 0; i < CACHE_SIZE; ++i)
 		{
-			std::cout << SalesTax::fast_rate_lookup(my_array[i], my_obj) << std::endl;
+			std::cout << sales_tax::fast_rate_lookup(my_array[i], my_obj) << std::endl;
 		}
 		my_obj.dump_cache(); //first element = "Nano"
 
-		std::cout << SalesTax::fast_rate_lookup(my_array[1], my_obj); // must be from cache;
+		std::cout << sales_tax::fast_rate_lookup(my_array[1], my_obj); // must be from cache;
 		my_obj.dump_cache(); // first element = "Genetics"
 	}
-	void Test_LRU_4()
+	void test_lru_4()
 	{
-		CLRU my_obj;
+		clru my_obj;
 		std::string my_array[CACHE_SIZE+1] = { "Robotics","Genetics","Nano" , "CompuVision" };
 
 		for (int i = 0; i < CACHE_SIZE; ++i)
 		{
-			std::cout << SalesTax::fast_rate_lookup(my_array[i], my_obj) << std::endl;
+			std::cout << sales_tax::fast_rate_lookup(my_array[i], my_obj) << std::endl;
 			my_obj.dump_cache();
 		}
 		my_obj.dump_cache();
 		for (int i = 0; i < (CACHE_SIZE+1); ++i)
 		{
-			std::cout << SalesTax::fast_rate_lookup(my_array[i], my_obj) << std::endl;
+			std::cout << sales_tax::fast_rate_lookup(my_array[i], my_obj) << std::endl;
 			my_obj.dump_cache();
 
 		}
 		// print cache - Robotics should be replaced with CompuVision in the cache;
 		my_obj.dump_cache();
 		
-		SalesTax::fast_rate_lookup(my_array[0], my_obj);
+		sales_tax::fast_rate_lookup(my_array[0], my_obj);
 		my_obj.dump_cache();
 	}
 
@@ -240,8 +239,8 @@ namespace Test
 
 int main()
 {
-	Test::Test_LRU_3();
-	Test::Test_LRU_4();
+	test::test_lru_3();
+	test::test_lru_4();
     return 0;
 }
 
