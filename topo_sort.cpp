@@ -1,6 +1,7 @@
 // Topological_Sorting.cpp : Defines the entry point for the console application.
 //
 
+#include<iostream>
 #include<vector>
 #include<list>
 #include<stack>
@@ -18,22 +19,52 @@ public:
 		_list.push_back(to);
 	}
 
+	void print_graph()
+	{
+		size_t _size= _the_graph.size();
+		for (int i = 0; i< _size; ++i)
+		{
+			std::cout << "graph index = " << i << "=>  " ;
+			std::list<int>& _list = _the_graph[i];
+			for(auto y:_list)
+			{
+				std::cout << y << ",";
+			}
+			std::cout << std::endl;
+		}
+		
+	}
+
+	void print_topo_sort(std::stack<int>& sorted_vertices)
+	{
+		while (!sorted_vertices.empty())
+  		{
+      		std::cout << sorted_vertices.top() << '\t';
+      		sorted_vertices.pop();
+ 		 }
+	}
 	void topology_sort()
 	{
 		std::stack<int> sorted_vertices;
 		std::vector<bool> visited;
 		size_t _size= _the_graph.size();
+		std::cout << "graph size= " << _size <<std::endl;
 		visited.resize(_size);
 
 		for (int k = 0; k < _size; ++k)
 		{
 			visited[k] = false;
 		}
+
 		for (int i = 0; i < _size; ++i)
 		{
 			if (!visited[i])
 				topology_sort_utility(sorted_vertices, visited, i);
 		}
+
+		std::cout << std::endl << "sorted vector" << std::endl;
+
+		print_topo_sort(sorted_vertices);
 	}
 
 	typedef std::vector<std::list<int> > the_graph;
@@ -42,7 +73,6 @@ private:
 	void topology_sort_utility(std::stack<int>& _stack,std::vector<bool>& visited, int v)
 	{
 		visited[v] = true;
-
 		std::list<int>& _list = _the_graph[v];
 		std::list<int>::iterator it = _list.begin();
 		std::list<int>::iterator end = _list.end();
@@ -58,40 +88,20 @@ private:
 	}
 	the_graph _the_graph;
 };
-#include<stdlib.h>
-class Tiles2xN
-{
-public:
-	Tiles2xN()
-	{}
-	size_t count_ways(size_t cols)
-	{
-		if (cols == 0)
-			return 0;
-		if (cols == 1)
-			return 1;
-		return count_ways(cols - 1) + 1 + count_ways(cols - 2);
-	}
-
-	size_t count_ways_other(size_t cols)
-	{
-		if (cols == 0)
-			return 0;
-		if (cols == 1)
-			return 1;
-		if (cols == 2)
-			return 2;
-		return count_ways(cols - 1) + count_ways(cols - 2);
-	}
-private:
-
-};
 
 int main()
 {
-	Tiles2xN x;
-	size_t kk= x.count_ways(5);
-	size_t pp = x.count_ways_other(5);
+	CGraph cg(10);
+
+	cg.add_edge(0,2);
+	cg.add_edge(2,3);
+	cg.add_edge(4,5);
+	cg.add_edge(2,7);
+	cg.add_edge(6,8);
+	cg.add_edge(3,5);
+
+	cg.print_graph();
+	cg.topology_sort();
 
     return 0;
 }
