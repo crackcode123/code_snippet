@@ -6,8 +6,16 @@
 #include <iostream>
 #include <algorithm>
 #include <iomanip>
+#include <cstdint>
 
 using namespace std;
+
+int16_t naive_match(const char* text, size_t m, const char* pattern, size_t n)
+{
+	return 0;
+	
+}
+
 
 /*
 	compute table to have largest prefix length of the substring which is also suffix of same substring
@@ -79,7 +87,8 @@ static void compute_longest_suffix_prefix_table(std::vector<int>& table, const s
 
 int main(int argc, char* argv[])
 {
-	vector<int> table;
+
+	std::vector<int> table;
 
 	// [ Unit Test ] - 1   abab        -> 0 0 1 2
 	// [ Unit Test ] - 2   abcabc      -> 0 0 0 1 2 3
