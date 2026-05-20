@@ -1,0 +1,8 @@
+[package]
+name = "pin_threads"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+core_affinity = "0.8"
+rand = "0.8"
