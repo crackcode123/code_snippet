@@ -178,6 +178,95 @@ int search(uint32_t addr, uint32_t *nexthop_out)
 }
 
 /* ------------------------------------------------------------------ */
+/* Delete                                                             */
+/* ------------------------------------------------------------------ */
+
+/* Remove the route for exactly (key/prefix_len).
+ * Returns 1 if a matching route was removed, 0 if none existed.
+ *
+ * After clearing the route we walk back up the path collapsing any node
+ * that is no longer needed: a glue node (nexthop 0) with a single child is
+ * merged into that child, and an empty leaf is unlinked from its parent.
+ * The collapse cascades upward so the trie stays path-compressed.
+ */
+int delete(uint32_t key, int prefix_len)
+{
+    key &= prefix_mask(prefix_len);
+
+    if (root == NULL)
+        return 0;
+
+    /* Default route lives on the root, which is never freed. */
+    if (prefix_len == 0) {
+        if (root->nexthop == 0)
+            return 0;
+        root->nexthop = 0;
+        return 1;
+    }
+
+    struct node *path[34];   /* path[0..depth] = root .. target        */
+    int          slot[34];   /* slot[i] = child index from path[i]     */
+    int          depth = 0;
+
+    path[0] = root;
+
+    for (;;) {
+        struct node *cur   = path[depth];
+        int          b     = bit_at(key, cur->prefix_len);
+        struct node *child = cur->node[b];
+
+        if (child == NULL)
+            return 0;                  /* not found */
+
+        int lim = prefix_len < child->prefix_len ? prefix_len : child->prefix_len;
+        if (common_prefix_len(key, child->prefix, lim) < child->prefix_len)
+            return 0;                  /* diverges: not found */
+
+        slot[depth]  = b;
+        path[++depth] = child;
+
+        if (child->prefix_len == prefix_len)
+            break;                     /* found the exact node */
+
+        /* child->prefix_len < prefix_len here, so keep descending */
+    }
+
+    struct node *target = path[depth];
+    if (target->nexthop == 0)
+        return 0;                      /* node exists but carries no route */
+
+    target->nexthop = 0;               /* remove the route */
+
+    /* Collapse redundant nodes from the target back up toward the root. */
+    for (int i = depth; i >= 1; i--) {
+        struct node *n      = path[i];
+        struct node *parent = path[i - 1];
+        int          pslot  = slot[i - 1];
+
+        if (n->nexthop != 0)
+            break;                     /* real route: node must stay */
+
+        int cnt = (n->node[0] != NULL) + (n->node[1] != NULL);
+
+        if (cnt == 2)
+            break;                     /* branch point: node must stay */
+
+        if (cnt == 1) {
+            /* merge glue node into its single child */
+            parent->node[pslot] = n->node[0] ? n->node[0] : n->node[1];
+            free(n);
+            break;                     /* parent's child count is unchanged */
+        }
+
+        /* cnt == 0: unlink empty leaf; parent may now be collapsible too */
+        parent->node[pslot] = NULL;
+        free(n);
+    }
+
+    return 1;
+}
+
+/* ------------------------------------------------------------------ */
 /* Demo                                                               */
 /* ------------------------------------------------------------------ */
 
@@ -221,6 +310,22 @@ int main(void)
     lookup(ipv4(10, 9, 9, 9));    /* -> .1 (/8)                */
     lookup(ipv4(172, 16, 5, 5));  /* -> .4 (/12)               */
     lookup(ipv4(8, 8, 8, 8));     /* -> .254 (default route)   */
+
+    printf("\n-- delete 10.1.2.0/24 --\n");
+    delete(ipv4(10, 1, 2, 0), 24);
+    lookup(ipv4(10, 1, 2, 55));   /* now falls back to .2 (/16) */
+
+    printf("\n-- delete 10.1.0.0/16 --\n");
+    delete(ipv4(10, 1, 0, 0), 16);
+    lookup(ipv4(10, 1, 2, 55));   /* now falls back to .1 (/8)  */
+    lookup(ipv4(10, 1, 9, 9));    /* now falls back to .1 (/8)  */
+
+    printf("\n-- delete default route --\n");
+    delete(ipv4(0, 0, 0, 0), 0);
+    lookup(ipv4(8, 8, 8, 8));     /* now no route               */
+
+    printf("\n-- delete non-existent 5.5.5.0/24 --\n");
+    printf("removed = %d\n", delete(ipv4(5, 5, 5, 0), 24)); /* -> 0 */
 
     return 0;
 }
