@@ -98,7 +98,8 @@ void insert(uint32_t key, int prefix_len, uint32_t nexthop)
 
     /* Default route (0.0.0.0/0) lives on the root itself. */
     if (prefix_len == 0) {
-        root->nexthop = nexthop;
+        if (root->nexthop == 0)   /* only add if there is no default route yet */
+            root->nexthop = nexthop;
         return;
     }
 
@@ -120,7 +121,8 @@ void insert(uint32_t key, int prefix_len, uint32_t nexthop)
         if (cpl == child->prefix_len) {
             /* child->prefix is a prefix of key: descend into it. */
             if (child->prefix_len == prefix_len) {
-                child->nexthop = nexthop;  /* exact match: update route */
+                /* Exact prefix already present: leave it untouched.
+                 * Call update() to change an existing route's nexthop. */
                 return;
             }
             parent = child;
@@ -142,6 +144,52 @@ void insert(uint32_t key, int prefix_len, uint32_t nexthop)
                 new_node(key, prefix_len, nexthop);
         }
         return;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* Update                                                             */
+/* ------------------------------------------------------------------ */
+
+/* Change the nexthop of an *existing* exact (key/prefix_len) route.
+ * Returns 1 if that route existed and was updated, 0 if there is no such
+ * route (in which case nothing is created -- use insert() to add one).
+ */
+int update(uint32_t key, int prefix_len, uint32_t nexthop)
+{
+    key &= prefix_mask(prefix_len);
+
+    if (root == NULL)
+        return 0;
+
+    /* Default route (0.0.0.0/0) lives on the root itself. */
+    if (prefix_len == 0) {
+        if (root->nexthop == 0)
+            return 0;              /* no default route to update */
+        root->nexthop = nexthop;
+        return 1;
+    }
+
+    struct node *cur = root;       /* matched up to cur->prefix_len bits */
+
+    for (;;) {
+        struct node *child = cur->node[bit_at(key, cur->prefix_len)];
+
+        if (child == NULL)
+            return 0;              /* not found */
+
+        int lim = prefix_len < child->prefix_len ? prefix_len : child->prefix_len;
+        if (common_prefix_len(key, child->prefix, lim) < child->prefix_len)
+            return 0;              /* diverges: not found */
+
+        if (child->prefix_len == prefix_len) {
+            if (child->nexthop == 0)
+                return 0;          /* glue node, not a real route */
+            child->nexthop = nexthop;
+            return 1;
+        }
+
+        cur = child;               /* child->prefix_len < prefix_len: descend */
     }
 }
 
@@ -310,6 +358,14 @@ int main(void)
     lookup(ipv4(10, 9, 9, 9));    /* -> .1 (/8)                */
     lookup(ipv4(172, 16, 5, 5));  /* -> .4 (/12)               */
     lookup(ipv4(8, 8, 8, 8));     /* -> .254 (default route)   */
+
+    printf("\n-- re-insert 10.1.2.0/24 is ignored, update changes it --\n");
+    insert(ipv4(10, 1, 2, 0), 24, ipv4(9, 9, 9, 9));   /* duplicate: ignored */
+    lookup(ipv4(10, 1, 2, 55));                         /* still -> .3 */
+    update(ipv4(10, 1, 2, 0), 24, ipv4(192, 168, 1, 99));
+    lookup(ipv4(10, 1, 2, 55));                         /* now  -> .99 */
+    printf("update 5.5.5.0/24 (absent) = %d\n",
+           update(ipv4(5, 5, 5, 0), 24, ipv4(1, 1, 1, 1))); /* -> 0 */
 
     printf("\n-- delete 10.1.2.0/24 --\n");
     delete(ipv4(10, 1, 2, 0), 24);
