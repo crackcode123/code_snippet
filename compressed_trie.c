@@ -133,15 +133,16 @@ void insert(uint32_t key, int prefix_len, uint32_t nexthop)
         struct node *inter =
             new_node(key & prefix_mask(cpl), cpl, 0);
 
-        inter->node[bit_at(child->prefix, cpl)] = child;
+        int s = bit_at(child->prefix, cpl);   /* side the old child takes */
+        inter->node[s] = child;
         parent->node[b] = inter;
 
         if (cpl == prefix_len) {
             /* new prefix is exactly the split point -> real route on inter */
             inter->nexthop = nexthop;
         } else {
-            inter->node[bit_at(key, cpl)] =
-                new_node(key, prefix_len, nexthop);
+            /* key differs from child at bit cpl, so it takes the other side */
+            inter->node[!s] = new_node(key, prefix_len, nexthop);
         }
         return;
     }
